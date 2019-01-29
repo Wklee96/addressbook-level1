@@ -111,6 +111,12 @@ public class AddressBook {
     private static final String COMMAND_FIND_PARAMETERS = "KEYWORD [MORE_KEYWORDS]";
     private static final String COMMAND_FIND_EXAMPLE = COMMAND_FIND_WORD + " alice bob charlie";
 
+    private static final String COMMAND_FIND_PHONE= "findPhone";
+    private static final String COMMAND_FIND_PHONE_DESC = "Finds all persons whose phone number starts with any of the specified "
+            + "numbers and displays them as a list with index numbers.";
+    private static final String COMMAND_FIND_PHONE_PARAMETERS = "KEYWORD [MORE_KEYWORDS]";
+    private static final String COMMAND_FIND_PHONE_EXAMPLE = COMMAND_FIND_WORD + " 9966 96 91230410";
+
     private static final String COMMAND_LIST_WORD = "list";
     private static final String COMMAND_LIST_DESC = "Displays all persons as a list with index numbers.";
     private static final String COMMAND_LIST_EXAMPLE = COMMAND_LIST_WORD;
@@ -373,6 +379,8 @@ public class AddressBook {
             return executeAddPerson(commandArgs);
         case COMMAND_FIND_WORD:
             return executeFindPersons(commandArgs);
+        case COMMAND_FIND_PHONE:
+            return executeFindPhone(commandArgs);
         case COMMAND_LIST_WORD:
             return executeListAllPersonsInAddressBook();
         case COMMAND_DELETE_WORD:
@@ -450,8 +458,22 @@ public class AddressBook {
      * @return feedback display message for the operation result
      */
     private static String executeFindPersons(String commandArgs) {
-        final Set<String> keywords = extractKeywordsFromFindPersonArgs(commandArgs);
+        final Set<String> keywords = extractKeywordsFromFindArgs(commandArgs);
         final ArrayList<String[]> personsFound = getPersonsWithNameContainingAnyKeyword(keywords);
+        showToUser(personsFound);
+        return getMessageForPersonsDisplayedSummary(personsFound);
+    }
+
+    /**
+     * Finds and lists all persons in address book whose name contains any of the argument keywords.
+     * Keyword matching is case sensitive.
+     *
+     * @param commandArgs full command args string from the user
+     * @return feedback display message for the operation result
+     */
+    private static String executeFindPhone(String commandArgs) {
+        final Set<String> keywords = extractKeywordsFromFindArgs(commandArgs);
+        final ArrayList<String[]> personsFound = getPersonsWithPhoneContainingAnyKeyword(keywords);
         showToUser(personsFound);
         return getMessageForPersonsDisplayedSummary(personsFound);
     }
@@ -469,11 +491,11 @@ public class AddressBook {
     /**
      * Extracts keywords from the command arguments given for the find persons command.
      *
-     * @param findPersonCommandArgs full command args string for the find persons command
+     * @param findCommandArgs full command args string for the find persons command
      * @return set of keywords as specified by args
      */
-    private static Set<String> extractKeywordsFromFindPersonArgs(String findPersonCommandArgs) {
-        return new HashSet<>(splitByWhitespace(findPersonCommandArgs.trim()));
+    private static Set<String> extractKeywordsFromFindArgs(String findCommandArgs) {
+        return new HashSet<>(splitByWhitespace(findCommandArgs.trim()));
     }
 
     /**
@@ -493,6 +515,22 @@ public class AddressBook {
         return matchedPersons;
     }
 
+    /**
+     * Retrieves all persons in the full model whose names contain some of the specified keywords.
+     *
+     * @param keywords for searching
+     * @return list of persons in full model with name containing some of the keywords
+     */
+    private static ArrayList<String[]> getPersonsWithPhoneContainingAnyKeyword(Collection<String> keywords) {
+        final ArrayList<String[]> matchedPersons = new ArrayList<>();
+        for (String[] person : getAllPersonsInAddressBook()) {
+            final Set<String> phoneInName = new HashSet<>(splitByWhitespace(getPhoneFromPerson(person)));
+            if (!Collections.disjoint(phoneInName, keywords)) {
+                matchedPersons.add(person);
+            }
+        }
+        return matchedPersons;
+    }
     /**
      * Deletes person identified using last displayed index.
      *
@@ -1084,6 +1122,7 @@ public class AddressBook {
     private static String getUsageInfoForAllCommands() {
         return getUsageInfoForAddCommand() + LS
                 + getUsageInfoForFindCommand() + LS
+                + getUsageInfoForFindPhoneCommand() + LS
                 + getUsageInfoForViewCommand() + LS
                 + getUsageInfoForDeleteCommand() + LS
                 + getUsageInfoForClearCommand() + LS
@@ -1103,6 +1142,13 @@ public class AddressBook {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_FIND_WORD, COMMAND_FIND_DESC) + LS
                 + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_FIND_PARAMETERS) + LS
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_FIND_EXAMPLE) + LS;
+    }
+
+    /** Returns the string for showing 'find' command usage instruction */
+    private static String getUsageInfoForFindPhoneCommand() {
+        return String.format(MESSAGE_COMMAND_HELP, COMMAND_FIND_PHONE, COMMAND_FIND_PHONE_DESC) + LS
+                + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_FIND_PHONE_PARAMETERS) + LS
+                + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_FIND_PHONE_EXAMPLE) + LS;
     }
 
     /** Returns the string for showing 'delete' command usage instruction */
