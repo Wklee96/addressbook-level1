@@ -62,6 +62,21 @@
   find Charlie Betsy
 
 ##########################################################
+# test findPhone persons command
+##########################################################
+
+  # should match none with no keywords
+  findPhone
+  # does not match if none have keyword
+  findPhone Dickson
+
+  # find unique keyword
+  findPhone 11
+  # find multiple with some keywords
+  findPhone 22 33
+
+
+##########################################################
 # test delete person command
 ##########################################################
 

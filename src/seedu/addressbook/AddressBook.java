@@ -465,8 +465,7 @@ public class AddressBook {
     }
 
     /**
-     * Finds and lists all persons in address book whose name contains any of the argument keywords.
-     * Keyword matching is case sensitive.
+     * Finds and lists all persons in address book whose phone number starts with any of the argument keywords.
      *
      * @param commandArgs full command args string from the user
      * @return feedback display message for the operation result
@@ -489,7 +488,7 @@ public class AddressBook {
     }
 
     /**
-     * Extracts keywords from the command arguments given for the find persons command.
+     * Extracts keywords from the command arguments given for the find or findPhone command.
      *
      * @param findCommandArgs full command args string for the find persons command
      * @return set of keywords as specified by args
@@ -516,7 +515,7 @@ public class AddressBook {
     }
 
     /**
-     * Retrieves all persons in the full model whose names contain some of the specified keywords.
+     * Retrieves all persons in the full model whose phone number starts with some of the specified keywords.
      *
      * @param keywords for searching
      * @return list of persons in full model with name containing some of the keywords
@@ -524,9 +523,11 @@ public class AddressBook {
     private static ArrayList<String[]> getPersonsWithPhoneContainingAnyKeyword(Collection<String> keywords) {
         final ArrayList<String[]> matchedPersons = new ArrayList<>();
         for (String[] person : getAllPersonsInAddressBook()) {
-            final Set<String> phoneInName = new HashSet<>(splitByWhitespace(getPhoneFromPerson(person)));
-            if (!Collections.disjoint(phoneInName, keywords)) {
-                matchedPersons.add(person);
+            for (String keyword : keywords) {
+                if (!keyword.equals("") && getPhoneFromPerson(person).startsWith(keyword)) {
+                    matchedPersons.add(person);
+                    break;
+                }
             }
         }
         return matchedPersons;
@@ -1144,7 +1145,7 @@ public class AddressBook {
                 + String.format(MESSAGE_COMMAND_HELP_EXAMPLE, COMMAND_FIND_EXAMPLE) + LS;
     }
 
-    /** Returns the string for showing 'find' command usage instruction */
+    /** Returns the string for showing 'findPhone' command usage instruction */
     private static String getUsageInfoForFindPhoneCommand() {
         return String.format(MESSAGE_COMMAND_HELP, COMMAND_FIND_PHONE, COMMAND_FIND_PHONE_DESC) + LS
                 + String.format(MESSAGE_COMMAND_HELP_PARAMETERS, COMMAND_FIND_PHONE_PARAMETERS) + LS
